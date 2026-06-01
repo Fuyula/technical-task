@@ -15,16 +15,25 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const SKELETON_ITEMS = 10;
 
-const TimelineItem = ({ item, isActive }: TimelineItemProps) => {
+const TimelineItem = ({
+  item,
+  isActive,
+  currentRef,
+  onSelect,
+  groupIndex,
+  itemIndex,
+}: TimelineItemProps) => {
   return (
     <div
       id={item.id}
       role='option'
       aria-selected={isActive}
-      className={`flex flex-col lg:flex-row lg:items-center lg:gap-4 p-2 pb-0.5 mb-1 w-full ${
+      ref={isActive ? currentRef : undefined}
+      className={`flex flex-col lg:flex-row lg:items-center lg:gap-4 p-2 pb-0.5 mb-1 w-full hover:opacity-50 hover:cursor-pointer transition-all ${
         isActive ? 'border-b-3 border-zinc-600' : ''
       }`}
       aria-label={`${formatTimeForReader(item.date)}, ${item.label}`}
+      onClick={() => onSelect?.(groupIndex, itemIndex, item)}
     >
       <div className='flex flex-row gap-4 shrink-0'>
         <span className='text-muted-foreground'>
@@ -33,6 +42,7 @@ const TimelineItem = ({ item, isActive }: TimelineItemProps) => {
             hour12: false,
           })}
         </span>{' '}
+        {item.extra}
       </div>
       <p
         className='font-semibold lg:font-normal truncate flex-1 min-w-0'
@@ -48,8 +58,11 @@ const TimelineGroup = ({
   title,
   items,
   isActive,
+  groupIndex,
   itemIndex,
+  currentRef,
   groupPeriod,
+  onSelect,
 }: TimelineGroupProps) => {
   return (
     <div
@@ -76,6 +89,10 @@ const TimelineGroup = ({
             isActive={isActive && itemIndex === index}
             key={item.id}
             item={item}
+            currentRef={currentRef}
+            onSelect={onSelect}
+            groupIndex={groupIndex}
+            itemIndex={index}
           />
         ))}
       </div>
@@ -86,8 +103,10 @@ const TimelineGroup = ({
 const Timeline = ({
   items,
   groupPeriod = 'day',
-  loading,
   size = '2xl',
+  onSelect,
+  listboxRef,
+  loading,
 }: TimelineProps) => {
   const currentRef = useRef<HTMLDivElement>(null);
   const [groupIndex, setGroupIndex] = useState(0);
@@ -105,11 +124,7 @@ const Timeline = ({
 
   const groupedItems = useMemo(
     () =>
-      groupBy(
-        items,
-        (item: TimelineItemType) => toLocalKey(item.date, groupPeriod),
-        groupPeriod,
-      ),
+      groupBy(items, (item) => toLocalKey(item.date, groupPeriod), groupPeriod),
     [groupPeriod, items],
   );
 
@@ -125,6 +140,17 @@ const Timeline = ({
   }, [groupedItems]);
 
   const activeId: string = flatEvents[groupIndex]?.[1]?.[itemIndex]?.id;
+
+  const handleSelect = (
+    groupIdx: number,
+    itemIdx: number,
+    item: TimelineItemType,
+  ) => {
+    setGroupIndex(groupIdx);
+    setItemIndex(itemIdx);
+    listboxRef?.current?.focus();
+    onSelect?.(item);
+  };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     const currentGroup = flatEvents[groupIndex]?.[1] ?? [];
@@ -160,6 +186,14 @@ const Timeline = ({
         e.preventDefault();
         setItemIndex((index) => Math.max(0, index - 1));
         break;
+      case 'Enter':
+      case ' ': {
+        e.preventDefault();
+        const item = flatEvents[groupIndex]?.[1]?.[itemIndex];
+        if (item) onSelect?.(item);
+        break;
+      }
+
       case 'Home':
         e.preventDefault();
         setItemIndex(0);
@@ -199,6 +233,7 @@ const Timeline = ({
       ) : (
         <div
           role='listbox'
+          ref={listboxRef}
           aria-label='Timeline'
           onKeyDown={onKeyDown}
           aria-activedescendant={activeId}
@@ -214,7 +249,9 @@ const Timeline = ({
                 key={key}
                 title={key}
                 items={values}
+                currentRef={currentRef}
                 groupPeriod={groupPeriod}
+                onSelect={handleSelect}
               />
             ))
           ) : (
