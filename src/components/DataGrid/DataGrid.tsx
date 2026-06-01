@@ -4,6 +4,7 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   type SortingState,
   useReactTable,
@@ -26,15 +27,24 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
 import { Eye } from 'lucide-react';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  pageSize?: number;
 }
 
 const DataGrid = <TData, TValue>({
   columns,
   data,
+  pageSize = 10,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -45,6 +55,7 @@ const DataGrid = <TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
@@ -55,10 +66,19 @@ const DataGrid = <TData, TValue>({
       columnFilters,
       columnVisibility,
     },
+    initialState: {
+      pagination: {
+        pageIndex: 0,
+        pageSize,
+      },
+    },
   });
 
+  const { pageIndex } = table.getState().pagination;
   const total = data.length;
   const filtered = table.getFilteredRowModel().rows.length;
+  const from = pageIndex * pageSize + 1;
+  const to = Math.min((pageIndex + 1) * pageSize, filtered);
 
   const visibleColumns = table.getVisibleLeafColumns();
   const noVisibleColumns = visibleColumns.length === 0;
@@ -159,6 +179,36 @@ const DataGrid = <TData, TValue>({
             </>
           )}
         </Table>
+      </div>
+      <div className='flex flex-row items-center justify-between py-4'>
+        <div className='flex flex-row flex-1 gap-2'>
+          <span className='text-sm'>
+            Page {pageIndex + 1} of {table.getPageCount()}
+          </span>
+          <div className='text-sm text-muted-foreground'>
+            Showing {from}–{to} of {filtered}
+          </div>
+        </div>
+        <Pagination className='flex-2'>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href='#'
+                onClick={() =>
+                  table.getCanPreviousPage() && table.previousPage()
+                }
+                aria-disabled={!table.getCanPreviousPage()}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                href='#'
+                onClick={() => table.getCanNextPage() && table.nextPage()}
+                aria-disabled={!table.getCanNextPage()}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );
