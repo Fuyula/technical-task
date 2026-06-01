@@ -1,4 +1,5 @@
 export { default as DataGrid } from './DataGrid/DataGrid';
+export { default as ColumnHeader } from './DataGrid/ColumnHeader';
 export { default as Form } from './Form/Form';
 export type { FormValues } from './Form/Form';
 export { default as Timeline } from './Timeline/Timeline';
