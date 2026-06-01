@@ -14,7 +14,7 @@ export interface TimelineGroupProps {
   groupIndex: number;
   currentRef: React.RefObject<HTMLDivElement | null>;
   groupPeriod: 'day' | 'hour';
-  onSelect?: (groupIdx: number, itemIdx: number, item: TimelineItem) => void;
+  onSelect: (groupIdx: number, itemIdx: number, item: TimelineItem) => void;
 }
 
 export interface TimelineItemProps {
@@ -23,14 +23,15 @@ export interface TimelineItemProps {
   itemIndex: number;
   groupIndex: number;
   currentRef: React.RefObject<HTMLDivElement | null>;
-  onSelect?: (groupIdx: number, itemIdx: number, item: TimelineItem) => void;
+  onSelect: (groupIdx: number, itemIdx: number, item: TimelineItem) => void;
 }
 
 export interface TimelineProps {
   items: TimelineItem[];
   groupPeriod?: 'day' | 'hour';
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
-  onSelect?: (item: TimelineItem) => void;
+  onSelect: (item: TimelineItem) => void;
   listboxRef?: React.RefObject<HTMLDivElement | null>;
+
   loading?: boolean;
 }

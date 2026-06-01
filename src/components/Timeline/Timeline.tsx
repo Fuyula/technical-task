@@ -33,7 +33,7 @@ const TimelineItem = ({
         isActive ? 'border-b-3 border-zinc-600' : ''
       }`}
       aria-label={`${formatTimeForReader(item.date)}, ${item.label}`}
-      onClick={() => onSelect?.(groupIndex, itemIndex, item)}
+      onClick={() => onSelect(groupIndex, itemIndex, item)}
     >
       <div className='flex flex-row gap-4 shrink-0'>
         <span className='text-muted-foreground'>
@@ -149,7 +149,7 @@ const Timeline = ({
     setGroupIndex(groupIdx);
     setItemIndex(itemIdx);
     listboxRef?.current?.focus();
-    onSelect?.(item);
+    onSelect(item);
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -190,7 +190,7 @@ const Timeline = ({
       case ' ': {
         e.preventDefault();
         const item = flatEvents[groupIndex]?.[1]?.[itemIndex];
-        if (item) onSelect?.(item);
+        if (item) onSelect(item);
         break;
       }
 
