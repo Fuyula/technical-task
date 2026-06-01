@@ -41,6 +41,8 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   pageSize?: number;
   loading?: boolean;
+  error?: Error | null;
+  onRetry?: () => void;
 }
 
 const DataGrid = <TData, TValue>({
@@ -48,6 +50,8 @@ const DataGrid = <TData, TValue>({
   data,
   pageSize = 10,
   loading = false,
+  error,
+  onRetry,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -169,6 +173,26 @@ const DataGrid = <TData, TValue>({
                     </TableRow>
                   ))}
                 </TableBody>
+              ) : error ? (
+                <TableRow className='hover:bg-transparent'>
+                  <TableCell
+                    colSpan={visibleColumns.length || 1}
+                    className='h-24 text-center'
+                  >
+                    <div
+                      role='alert'
+                      className='flex flex-col items-center gap-2 text-destructive'
+                    >
+                      <p>Something went wrong loading the data.</p>
+                      <p className='text-muted-foreground'>{error.message}</p>
+                      {onRetry && (
+                        <Button variant='outline' onClick={onRetry}>
+                          Retry
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
               ) : (
                 <TableBody>
                   {table.getRowModel().rows?.length ? (
@@ -205,7 +229,7 @@ const DataGrid = <TData, TValue>({
           )}
         </Table>
       </div>
-      {!noVisibleColumns && (
+      {!error && !noVisibleColumns && (
         <div className='flex flex-row items-center justify-between py-4'>
           {loading ? (
             <Skeleton className='h-4 w-xs' />
