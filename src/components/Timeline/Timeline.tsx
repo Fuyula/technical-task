@@ -49,6 +49,7 @@ const TimelineGroup = ({
   items,
   isActive,
   itemIndex,
+  groupPeriod,
 }: TimelineGroupProps) => {
   return (
     <div
@@ -66,7 +67,9 @@ const TimelineGroup = ({
           id={`group-${title}`}
           className='lg:text-lg text-primary font-bold underline underline-offset-8 decoration-3 pb-2 decoration-primary'
         >
-          {formatDayForReader(title.slice(0, 10))}
+          {groupPeriod === 'hour'
+            ? formatDayForReader(title.slice(0, 10)) + `, ${title.slice(11)}:00`
+            : formatDayForReader(title.slice(0, 10))}
         </h3>
         {items.map((item, index) => (
           <TimelineItem
@@ -80,7 +83,12 @@ const TimelineGroup = ({
   );
 };
 
-const Timeline = ({ items, loading, size = '2xl' }: TimelineProps) => {
+const Timeline = ({
+  items,
+  groupPeriod = 'day',
+  loading,
+  size = '2xl',
+}: TimelineProps) => {
   const currentRef = useRef<HTMLDivElement>(null);
   const [groupIndex, setGroupIndex] = useState(0);
   const [itemIndex, setItemIndex] = useState(0);
@@ -96,8 +104,13 @@ const Timeline = ({ items, loading, size = '2xl' }: TimelineProps) => {
   }[size];
 
   const groupedItems = useMemo(
-    () => groupBy(items, (item: TimelineItemType) => toLocalKey(item.date)),
-    [items],
+    () =>
+      groupBy(
+        items,
+        (item: TimelineItemType) => toLocalKey(item.date, groupPeriod),
+        groupPeriod,
+      ),
+    [groupPeriod, items],
   );
 
   const flatEvents: [string, TimelineItemType[]][] = useMemo(() => {
@@ -201,6 +214,7 @@ const Timeline = ({ items, loading, size = '2xl' }: TimelineProps) => {
                 key={key}
                 title={key}
                 items={values}
+                groupPeriod={groupPeriod}
               />
             ))
           ) : (
