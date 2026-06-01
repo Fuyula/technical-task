@@ -33,7 +33,7 @@ const TimelineItem = ({
         isActive ? 'border-b-3 border-zinc-600' : ''
       }`}
       aria-label={`${formatTimeForReader(item.date)}, ${item.label}`}
-      onClick={() => onSelect(groupIndex, itemIndex, item)}
+      onClick={() => onSelect?.(groupIndex, itemIndex, item)}
     >
       <div className='flex flex-row gap-4 shrink-0'>
         <span className='text-muted-foreground'>
