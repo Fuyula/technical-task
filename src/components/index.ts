@@ -6,3 +6,5 @@ export { default as Timeline } from './Timeline/Timeline';
 export type { TimelineItem } from './Timeline/timelineTypes';
 export { default as Tag } from './Tag/Tag';
 export type { TagColor } from './Tag/Tag';
+export { default as EventFormModal } from './modals/EventFormModal';
+export { default as SingleEventModal } from './modals/SingleEventModal';
