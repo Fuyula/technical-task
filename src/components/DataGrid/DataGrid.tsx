@@ -94,10 +94,10 @@ const DataGrid = <TData, TValue>({
     <div>
       <div className='flex items-center py-4'>
         <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button variant='outline' className='ml-auto'>
-              <Eye /> Show/hide columns
-            </Button>
+          <DropdownMenuTrigger
+            render={<Button variant='outline' className='ml-auto' />}
+          >
+            <Eye /> Show/hide columns
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end'>
             {table
@@ -246,7 +246,7 @@ const DataGrid = <TData, TValue>({
           {loading ? (
             <Skeleton className='h-4 w-md' />
           ) : (
-            <Pagination className='flex-2'>
+            <Pagination className='flex-2 flex flex-row justify-end'>
               <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious
