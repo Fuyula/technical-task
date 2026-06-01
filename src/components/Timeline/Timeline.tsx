@@ -33,7 +33,7 @@ const TimelineItem = ({
         isActive ? 'border-b-3 border-zinc-600' : ''
       }`}
       aria-label={`${formatTimeForReader(item.date)}, ${item.label}`}
-      onClick={() => onSelect?.(groupIndex, itemIndex, item)}
+      onClick={() => onSelect(groupIndex, itemIndex, item)}
     >
       <div className='flex flex-row gap-4 shrink-0'>
         <span className='text-muted-foreground'>
@@ -130,12 +130,12 @@ const Timeline = ({
 
   const flatEvents: [string, TimelineItemType[]][] = useMemo(() => {
     const sortedGroupedItems = [...groupedItems.entries()].sort(([a], [b]) =>
-      a.localeCompare(b),
+      b.localeCompare(a),
     );
 
     return sortedGroupedItems.map(([day, items]) => [
       day,
-      [...items].sort((x, y) => x.date.localeCompare(y.date)),
+      [...items].sort((x, y) => y.date.localeCompare(x.date)),
     ]);
   }, [groupedItems]);
 
