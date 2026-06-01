@@ -34,17 +34,20 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   pageSize?: number;
+  loading?: boolean;
 }
 
 const DataGrid = <TData, TValue>({
   columns,
   data,
   pageSize = 10,
+  loading = false,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -113,7 +116,7 @@ const DataGrid = <TData, TValue>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className='overflow-hidden rounded-md border'>
+      <div className='overflow-hidden rounded-md border' aria-busy={loading}>
         <Table>
           {noVisibleColumns ? (
             <TableBody>
@@ -134,82 +137,114 @@ const DataGrid = <TData, TValue>({
                           key={header.id}
                           className='bg-primary text-olive-50'
                         >
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                              )}
+                          {loading ? (
+                            <Skeleton className='h-4 w-full opacity-20' />
+                          ) : header.isPlaceholder ? null : (
+                            flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )
+                          )}
                         </TableHead>
                       );
                     })}
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
+              {loading ? (
+                <TableBody>
+                  {Array.from({ length: pageSize }).map((_, index) => (
                     <TableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && 'selected'}
+                      className='hover:bg-transparent cursor-default'
+                      key={index}
                     >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </TableCell>
-                      ))}
+                      {table
+                        .getAllColumns()
+                        .filter((column) => column.getCanHide())
+                        .map((column) => (
+                          <TableCell key={column.id}>
+                            <Skeleton className='h-4 w-full' />
+                          </TableCell>
+                        ))}
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={visibleColumns.length || 1}
-                      className='h-24 text-center'
-                    >
-                      {total !== filtered
-                        ? 'No results match your search.'
-                        : 'No results.'}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
+                  ))}
+                </TableBody>
+              ) : (
+                <TableBody>
+                  {table.getRowModel().rows?.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        data-state={row.getIsSelected() && 'selected'}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={visibleColumns.length || 1}
+                        className='h-24 text-center'
+                      >
+                        {total !== filtered
+                          ? 'No results match your search.'
+                          : 'No results.'}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              )}
             </>
           )}
         </Table>
       </div>
-      <div className='flex flex-row items-center justify-between py-4'>
-        <div className='flex flex-row flex-1 gap-2'>
-          <span className='text-sm'>
-            Page {pageIndex + 1} of {table.getPageCount()}
-          </span>
-          <div className='text-sm text-muted-foreground'>
-            Showing {from}–{to} of {filtered}
-          </div>
+      {!noVisibleColumns && (
+        <div className='flex flex-row items-center justify-between py-4'>
+          {loading ? (
+            <Skeleton className='h-4 w-xs' />
+          ) : (
+            <div className='flex flex-row flex-1 gap-2'>
+              <span className='text-sm'>
+                Page {pageIndex + 1} of {table.getPageCount()}
+              </span>
+              <div className='text-sm text-muted-foreground'>
+                Showing {from}–{to} of {filtered}
+              </div>
+            </div>
+          )}
+          {loading ? (
+            <Skeleton className='h-4 w-md' />
+          ) : (
+            <Pagination className='flex-2'>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href='#'
+                    onClick={() =>
+                      table.getCanPreviousPage() && table.previousPage()
+                    }
+                    aria-disabled={!table.getCanPreviousPage()}
+                  />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext
+                    href='#'
+                    onClick={() => table.getCanNextPage() && table.nextPage()}
+                    aria-disabled={!table.getCanNextPage()}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
         </div>
-        <Pagination className='flex-2'>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href='#'
-                onClick={() =>
-                  table.getCanPreviousPage() && table.previousPage()
-                }
-                aria-disabled={!table.getCanPreviousPage()}
-              />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext
-                href='#'
-                onClick={() => table.getCanNextPage() && table.nextPage()}
-                aria-disabled={!table.getCanNextPage()}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
+      )}
     </div>
   );
 };
