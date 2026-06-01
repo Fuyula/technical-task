@@ -251,9 +251,9 @@ function App() {
         />
       </section>
       <hr />
-      <section className='flex flex-col lg:flex-row justify-center p-4 lg:p-8 gap-8 w-full'>
+      <section className='flex flex-col xl:flex-row justify-center p-4 lg:p-8 gap-8 w-full'>
         <div className='flex flex-col flex-1 gap-2'>
-          <h2 className='text-md md:text-xl text-secondary-foreground font-extralight'>
+          <h2 className='text-md md:text-xl text-secondary-foreground font-extralight min-w-0'>
             Data grid
           </h2>
           <p className='text-secondary-foreground text-sm'>
@@ -263,7 +263,7 @@ function App() {
           </p>
           <DataGrid loading={isLoading} data={events} columns={columns} />
         </div>
-        <div className='flex flex-col flex-1 gap-2'>
+        <div className='flex flex-col flex-1 gap-2 min-w-0'>
           <h2 className='text-md md:text-xl text-secondary-foreground font-extralight'>
             Timeline
           </h2>
