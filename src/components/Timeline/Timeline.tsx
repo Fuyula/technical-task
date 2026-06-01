@@ -11,6 +11,9 @@ import {
   groupBy,
   toLocalKey,
 } from './timelineUtils';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const SKELETON_ITEMS = 10;
 
 const TimelineItem = ({ item, isActive }: TimelineItemProps) => {
   return (
@@ -77,7 +80,7 @@ const TimelineGroup = ({
   );
 };
 
-const Timeline = ({ items, size = '2xl' }: TimelineProps) => {
+const Timeline = ({ items, loading, size = '2xl' }: TimelineProps) => {
   const currentRef = useRef<HTMLDivElement>(null);
   const [groupIndex, setGroupIndex] = useState(0);
   const [itemIndex, setItemIndex] = useState(0);
@@ -166,31 +169,47 @@ const Timeline = ({ items, size = '2xl' }: TimelineProps) => {
       <div aria-live='polite' className='sr-only'>
         {announcement}
       </div>
-      <div
-        role='listbox'
-        aria-label='Timeline'
-        onKeyDown={onKeyDown}
-        aria-activedescendant={activeId}
-        className='py-4 lg:p-4 w-full'
-        tabIndex={0}
-      >
-        {items.length > 0 ? (
-          flatEvents.map(([key, values], groupIdx) => (
-            <TimelineGroup
-              isActive={groupIndex === groupIdx}
-              groupIndex={groupIdx}
-              itemIndex={itemIndex}
-              key={key}
-              title={key}
-              items={values}
-            />
-          ))
-        ) : (
-          <div>
-            <p className='h-24 text-center'>No results.</p>
-          </div>
-        )}
-      </div>
+      {loading ? (
+        <div
+          aria-busy='true'
+          aria-label='Loading timeline'
+          className='flex flex-col w-full py-4 lg:p-4 gap-4'
+        >
+          {Array.from({ length: SKELETON_ITEMS }, (_, i) => (
+            <div className='flex flex-row gap-2 w-full' key={`skeleton_${i}`}>
+              <Skeleton className='h-6 w-1/5' />
+              <Skeleton className='h-6 w-1/5' />
+              <Skeleton className='h-6 w-full' />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div
+          role='listbox'
+          aria-label='Timeline'
+          onKeyDown={onKeyDown}
+          aria-activedescendant={activeId}
+          className='py-4 lg:p-4 w-full'
+          tabIndex={0}
+        >
+          {items.length > 0 ? (
+            flatEvents.map(([key, values], groupIdx) => (
+              <TimelineGroup
+                isActive={groupIndex === groupIdx}
+                groupIndex={groupIdx}
+                itemIndex={itemIndex}
+                key={key}
+                title={key}
+                items={values}
+              />
+            ))
+          ) : (
+            <div>
+              <p className='h-24 text-center'>No results.</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -19,4 +19,5 @@ export interface TimelineItemProps {
 export interface TimelineProps {
   items: TimelineItem[];
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
+  loading?: boolean;
 }
